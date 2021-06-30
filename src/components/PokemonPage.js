@@ -7,6 +7,12 @@ import { Container } from "semantic-ui-react";
 function PokemonPage() {
   const [pokemon, setPokemon] = useState([])
   const [search, setSearch] = useState("")
+  const [sortValue, setSortValue] = useState("none")
+
+  const handleSortChange = (e) => {
+    setSortValue(e.target.value)
+    // YOU CANNOT ACTUALLY DO THE SORT HERE!!!!
+  }
 
  useEffect(() => {
     fetch('http://localhost:3001/pokemon')
@@ -21,10 +27,32 @@ function PokemonPage() {
  }
 
  const displayedPokemon = () => {
-  if (search === ""){
+  if (search === "" && sortValue === "none"){
     return pokemon 
   }
-   return pokemon.filter(p => p.name.includes(search.toLowerCase()))
+  // first need to filter 
+  const filteredPokemon = pokemon.filter(p => p.name.includes(search.toLowerCase()))
+  // use the result to sort 
+  if(sortValue === "hplow"){
+    return filteredPokemon.sort((pokemonA,pokemonB) => {
+      return pokemonA.hp - pokemonB.hp;
+    })
+  } else if(sortValue === "hphigh"){
+    return filteredPokemon.sort((pokemonA,pokemonB) => {
+      return pokemonB.hp - pokemonA.hp;
+    })
+  } else if(sortValue === "nameAZ"){
+    return filteredPokemon.sort((pokemonA,pokemonB) => {
+      return pokemonA.name <= pokemonB.name ? -1 : 1;
+    })
+  }else if(sortValue === "nameZA"){
+    return filteredPokemon.sort((pokemonA,pokemonB) => {
+      return pokemonB.name <= pokemonA.name ? -1 : 1;
+    })
+  } else {
+    return filteredPokemon
+  }
+  
  }
 
  const addNewPokemon = (pokemonData) => {
@@ -52,7 +80,7 @@ function PokemonPage() {
       <br />
       <PokemonForm addNewPokemon={addNewPokemon}/>
       <br />
-      <Search search={search} handleChange={handleChange}/>
+      <Search search={search} handleChange={handleChange} sortValue={sortValue} handleSortChange={handleSortChange}/>
       <br />
       <PokemonCollection pokemon={displayedPokemon()} />
     </Container>
